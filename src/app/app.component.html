@@ -1,0 +1,8 @@
+<h1>
+  {{title}}
+</h1>
+<ul>
+<li *ngFor="let i of visualsCount">
+  <visualization *ngIf="dymoGraph" [data]="dymoGraph" [viewConfig]="viewConfig" [playingUris]="playingDymos"></visualization>
+</li>
+</ul>
