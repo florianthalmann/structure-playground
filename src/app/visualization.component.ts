@@ -43,7 +43,7 @@ export class VisualizationComponent implements OnInit, OnChanges {
   }
 
   onClick(dymo) {
-    this.dymoService.startPlaying(dymo);
+    this.dymoService.startPlayingDymo(dymo);
   }
 
   onResize(event) {

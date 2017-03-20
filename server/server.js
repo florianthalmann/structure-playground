@@ -7,15 +7,16 @@
 	var bodyParser = require('body-parser');
 	var async = require('async');
 	var util = require('./util.js');
-	var cors = require('cors');
+	//var cors = require('cors');
 
 	var PORT = '4199';
 	var INPUT_FOLDER = 'input/';
+	var OUTPUT_FOLDER = 'output/';
 	var SERVER_PATH = 'http://localhost:' + PORT + '/';
 
 	var app = express();
 
-	app.use(cors());
+	//app.use(cors());
 	app.use(express["static"](__dirname));
 	app.use(bodyParser.json({limit: '50mb'}));
 
@@ -113,12 +114,10 @@
 		form.parse(req);
 	});
 
-
-
-	app.post('/saveDymoFile', function(req, res) {
-		fs.writeFile('app/' + req.body.path, JSON.stringify(req.body.content, null, 2), function (err) {
+	app.post('/saveOutFile', function(req, res) {
+		fs.writeFile(__dirname + '/' + OUTPUT_FOLDER + req.body.path, JSON.stringify(req.body.content, null, 2), function (err) {
 			if (err) return res.send(err);
-			res.send('file saved at ' + req.body.path);
+			res.end('file saved at ' + req.body.path);
 		});
 	});
 

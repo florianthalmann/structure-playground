@@ -1,6 +1,28 @@
 <h1>
   {{title}}
 </h1>
+<button (click)="play()">Play</button>
+<button (click)="stop()">Stop</button>
+<label>
+  Iterative
+  <input type="checkbox" [(ngModel)]="options.isIterative" (change)="updateIterative(options.isIterative)">
+</label>
+<label>
+  Min segment length
+  <input [(ngModel)]="options.minSegmentLength" (keyup.enter)="updateMinSegmentLength(options.minSegmentLength)" size="2">
+</label>
+<label>
+  Max threshold
+  <input [(ngModel)]="options.maxThreshold" (keyup.enter)="updateMaxThreshold(options.maxThreshold)" size="2">
+</label>
+<label>
+  End threshold
+  <input [(ngModel)]="options.endThreshold" (keyup.enter)="updateEndThreshold(options.endThreshold)" size="2">
+</label>
+<label>
+  Patterns
+  <input [(ngModel)]="options.patternIndices" (keyup.enter)="updatePatterns(options.patternIndices)" size="10">
+</label>
 <ul>
 <li *ngFor="let i of visualsCount">
   <visualization *ngIf="dymoGraph" [data]="dymoGraph" [viewConfig]="viewConfig" [playingUris]="playingDymos"></visualization>

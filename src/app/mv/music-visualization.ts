@@ -54,8 +54,11 @@ export abstract class MusicVisualization {
 	updatePlaying(oldVals, newVals) {
 		if (oldVals.filter && newVals) {
 			this.playingUris = newVals;
+			//console.log(JSON.stringify(newVals))
+			//console.log(JSON.stringify(oldVals), JSON.stringify(newVals))
 			var toSelect = newVals.filter(i => oldVals.indexOf(i) < 0);
 			var toDeselect = oldVals.filter(i => newVals.indexOf(i) < 0);
+			//console.log(JSON.stringify(toSelect), JSON.stringify(toDeselect))
 
 			var lines = this.svg.selectAll(".edge");
 			lines.filter(e => toSelect.indexOf(this.getHighlightedEdge(e)) >= 0)

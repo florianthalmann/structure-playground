@@ -19,6 +19,13 @@ export class FeatureService {
       .then(response => response.json());
   }
 
+  postFile(path: string, content: string) {
+    this.http.post(this.serverPath + 'saveOutFile/', {path:path, content:content})
+      .toPromise()
+      .then(response => console.log(response._body))
+      .catch(error => this.handleError(error));
+  }
+
   httpGet(uri: string, params: Object): Promise<any> {
     let searchParams: URLSearchParams = new URLSearchParams();
     Object.keys(params).forEach(k => searchParams.set(k, params[k]));

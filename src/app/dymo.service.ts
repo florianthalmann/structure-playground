@@ -2,17 +2,18 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/debounceTime';
 import * as math from 'mathjs';
 import * as _ from 'lodash';
-import { JsonGraph, DymoManager, DymoGenerator, DymoTemplates, QUANT_FUNCS, OPTIMIZATION, uris } from 'dymo-core';
+import { JsonGraph, DymoManager, DymoGenerator, DymoTemplates, QUANT_FUNCS, OPTIMIZATION, uris, IterativeSmithWatermanResult } from 'dymo-core';
 import { ViewConfig, ViewConfigDim } from './mv/types';
 import { availableFeatures } from './features';
+import { FeatureService } from './feature.service';
 
 @Injectable()
 export class DymoService {
 
   private generator = new DymoGenerator();
-  private generatorReady: Promise<any>;
 
   private viewConfigTemplate: ViewConfig = {
     xAxis: this.createConfig("x-axis"),
@@ -24,12 +25,10 @@ export class DymoService {
     return { name:name, param:{name:"random", uri:null, min:0, max:1}, log:false};
   }
 
-  constructor() {
-    this.generatorReady = this.generator.init();
-  }
+  constructor(private featureService: FeatureService) { }
 
   isReady(): Promise<any> {
-    return this.generatorReady;
+    return this.generator.isReady();
   }
 
   getViewConfig(): Observable<ViewConfig> {
@@ -37,20 +36,35 @@ export class DymoService {
   }
 
   getDymoGraph(): Observable<JsonGraph> {
-    return this.generator.getManager().getJsonGraph(uris.DYMO, uris.HAS_PART);
+    return this.generator.getManager().getJsonGraph(uris.DYMO, uris.HAS_PART, true);
+  }
+
+  reload() {
+    this.generator.getManager().reloadFromStore();
   }
 
   getPlayingDymos(): Observable<string[]> {
-    return this.generator.getManager().getPlayingDymoUris();
+    return this.generator.getManager().getPlayingDymoUris()//.debounceTime(50);
   }
 
-  startPlaying(dymo) {
+  startPlaying(): void {
+    this.generator.getManager().startPlaying();
+  }
+
+  startPlayingDymo(dymo: Object): void {
     this.generator.getManager().startPlayingUri(dymo["@id"]);
-    //this.manager.startPlaying();
   }
 
-  addDymo(sourceFile, featureFiles) {
+  stopPlaying(): void {
+    this.generator.getManager().stopPlaying();
+  }
+
+  addDymo(sourceFile, featureFiles): Promise<string> {
     var [orderedFiles, subsetConditions] = this.filterSelectedFeatures(featureFiles);
+    return DymoTemplates.createSingleSourceDymoFromFeatures(this.generator, sourceFile, orderedFiles, subsetConditions);
+  }
+
+  induceStructure(patternIndices: number[]) {
     var QF = QUANT_FUNCS;
     function getPointsInBoundingBox(pattern, allPoints) {
       var maxes = math.max(pattern, 0);
@@ -89,13 +103,29 @@ export class DymoService {
         return pattern.length // Math.pow(1+gaps, 1/dim);
       },
       optimizationDimension: 5,
-      patternIndices: [0,1,2,3]
+      patternIndices: patternIndices
     }
-    //DymoTemplates.createStructuredDymoFromFeatures(this.generator, sourceFile, orderedFiles, subsetConditions, options, this.reloadFromStore);
-    DymoTemplates.createSingleSourceDymoFromFeatures(this.generator, sourceFile, orderedFiles, subsetConditions);
+    DymoTemplates.createStructuredDymoFromFeatures(this.generator, options);
   }
 
-  filterSelectedFeatures(featureUris) {
+  induceStructureSW(options: Object): Promise<IterativeSmithWatermanResult> {
+    var QF = QUANT_FUNCS;
+    options["quantizerFunctions"] = [QF.SORTED_SUMMARIZE(3), QF.CONSTANT(0), QF.ORDER()];
+    //options.optimizationDimension: 5,
+    return DymoTemplates.createStructuredDymoFromFeatures(this.generator, options)
+      .then(r => r.matrices.forEach((m,i) =>
+        this.featureService.postFile('matrix'+i+'.json', m.scoreMatrix)
+      ));
+  }
+
+  testSmithWatermanComparison(uri1, uri2, options: Object) {
+    var QF = QUANT_FUNCS;
+    options["quantizerFunctions"] = [QF.SORTED_SUMMARIZE(3), QF.CONSTANT(0), QF.ORDER()],
+    //options.optimizationDimension: 5,
+    DymoTemplates.testSmithWatermanComparison(this.generator, options, uri1, uri2);
+  }
+
+  private filterSelectedFeatures(featureUris) {
     var orderedFiles = [];
     var subsetConditions = [];
     for (var i = 0; i < availableFeatures.length; i++) {
@@ -111,18 +141,19 @@ export class DymoService {
     return [orderedFiles, subsetConditions];
   }
 
-  adjustViewConfig(features): ViewConfig {
+  private adjustViewConfig(features): ViewConfig {
     let newConfig = _.clone(this.viewConfigTemplate);
     //TEMPORARY HACK TO ADJUST MAX LEVELS
     if (features.length >= 2) {
-      features[features.length-2].max = 2;
+      features[features.length-2].max = 3;
     }
     this.setParam(newConfig.xAxis, "time", features);
-    this.setParam(newConfig.yAxis, "duration", features);
+    this.setParam(newConfig.yAxis, "level", features);
+    this.setParam(newConfig.size, "chromagram", features);
     return newConfig;
   }
 
-  setParam(viewParam, featureName, features) {
+  private setParam(viewParam, featureName, features) {
     features = features.filter(f => f.name === featureName);
     if (features.length > 0) {
       viewParam.param = features[0];
