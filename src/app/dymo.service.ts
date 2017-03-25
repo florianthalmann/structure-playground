@@ -5,7 +5,9 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/debounceTime';
 import * as math from 'mathjs';
 import * as _ from 'lodash';
-import { JsonGraph, DymoManager, DymoGenerator, DymoTemplates, QUANT_FUNCS, OPTIMIZATION, uris, IterativeSmithWatermanResult } from 'dymo-core';
+import { JsonGraph, DymoManager, uris } from 'dymo-core';
+import { DymoGenerator, DymoTemplates } from 'dymo-generator';
+import { QUANT_FUNCS, OPTIMIZATION, IterativeSmithWatermanResult } from 'siafun';
 import { ViewConfig, ViewConfigDim } from './mv/types';
 import { availableFeatures } from './features';
 import { FeatureService } from './feature.service';
@@ -110,7 +112,7 @@ export class DymoService {
 
   induceStructureSW(options: Object): Promise<IterativeSmithWatermanResult> {
     var QF = QUANT_FUNCS;
-    options["quantizerFunctions"] = [QF.SORTED_SUMMARIZE(3), QF.CONSTANT(0), QF.ORDER()];
+    options["quantizerFunctions"] = [QF.IDENTITY(), QF.CONSTANT(0), QF.ORDER()];
     //options.optimizationDimension: 5,
     return DymoTemplates.createStructuredDymoFromFeatures(this.generator, options)
       .then(r => r.matrices.forEach((m,i) =>
@@ -120,7 +122,7 @@ export class DymoService {
 
   testSmithWatermanComparison(uri1, uri2, options: Object) {
     var QF = QUANT_FUNCS;
-    options["quantizerFunctions"] = [QF.SORTED_SUMMARIZE(3), QF.CONSTANT(0), QF.ORDER()],
+    options["quantizerFunctions"] = [QF.SORTED_SUMMARIZE(10), QF.CONSTANT(0), QF.ORDER()],
     //options.optimizationDimension: 5,
     DymoTemplates.testSmithWatermanComparison(this.generator, options, uri1, uri2);
   }

@@ -13,7 +13,7 @@ import { JsonGraph } from 'dymo-core';
 export class AppComponent implements OnInit {
 
   title = 'Musical Structure Playground';
-  //private filename = 'fugue.m4a';//'jackstraw77-05-07.mp3';//'25435__insinger__free-jazz-text.wav'
+  //private filename = 'fugue.m4a';//'jackstraw77-05-07.mp3';'gallivanture.m4a'
   private filename1 = 'jackstraw77-05-07.mp3';
   private filename2 = 'jackstraw77-05-08.mp3';
   private dymoGraph: JsonGraph;
@@ -22,10 +22,12 @@ export class AppComponent implements OnInit {
   private visualsCount = _.range(1);
   private options = {
     iterative: true,
-    minSegmentLength: 10,
-    maxThreshold: 20,
+    similarityThreshold: 0.99,
+    minSegmentLength: 5,
+    maxThreshold: 10,
     endThreshold: 0,
-    patternIndices: "[0,1,2,3]"
+    onlyDiagonals: true,
+    patternIndices: ""
   };
 
   constructor(private featureService: FeatureService, private dymoService: DymoService) { }
@@ -64,31 +66,6 @@ export class AppComponent implements OnInit {
 
   reload(): void {
     this.dymoService.reload();
-  }
-
-  updateIterative(value: boolean): void {
-    this.options.iterative = value;
-    this.update();
-  }
-
-  updateMinSegmentLength(value: string): void {
-    this.options.minSegmentLength = JSON.parse(value);
-    this.update();
-  }
-
-  updateMaxThreshold(value: string): void {
-    this.options.maxThreshold = JSON.parse(value);
-    this.update();
-  }
-
-  updateEndThreshold(value: string): void {
-    this.options.endThreshold = JSON.parse(value);
-    this.update();
-  }
-
-  updatePatterns(value: string): void {
-    this.options.patternIndices = value;
-    this.update();
   }
 
   update(): void {

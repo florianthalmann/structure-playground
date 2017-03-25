@@ -7,8 +7,8 @@ export interface Feature {
 
 export let availableFeatures: Feature[] = [
   {name:'sections', plugin:'vamp:qm-vamp-plugins:qm-segmenter:segmentation', selected:false},
-  {name:'bars', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', subset:'1', selected:false},
-  {name:'beats', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', selected:true},
+  {name:'bars', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', subset:'1', selected:true},
+  {name:'beats', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', selected:false},
   {name:'onsets', plugin:'vamp:qm-vamp-plugins:qm-onsetdetector:onsets', selected:false},
   {name:'onsets2', plugin:'vamp:vamp-aubio:aubioonset:onsets', selected:false},
   {name:'logcentroid', plugin:'vamp:vamp-example-plugins:spectralcentroid:logcentroid', selected:false},

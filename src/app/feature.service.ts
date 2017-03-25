@@ -19,7 +19,7 @@ export class FeatureService {
       .then(response => response.json());
   }
 
-  postFile(path: string, content: string) {
+  postFile(path: string, content: Object) {
     this.http.post(this.serverPath + 'saveOutFile/', {path:path, content:content})
       .toPromise()
       .then(response => console.log(response._body))
