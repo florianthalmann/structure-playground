@@ -27,13 +27,16 @@
     "dymo-generator": "0.0.1",
     "express": "^4.14.1",
     "formidable": "^1.1.1",
+    "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.4",
     "rxjs": "^5.1.0",
+    "xmlhttprequest": "^1.8.0",
     "zone.js": "^0.7.6"
   },
   "devDependencies": {
     "@angular/cli": "1.0.0-rc.0",
     "@angular/compiler-cli": "^2.4.0",
+    "@types/async": "^2.0.40",
     "@types/d3": "^4.5.0",
     "@types/jasmine": "2.5.38",
     "@types/lodash": "^4.14.58",
