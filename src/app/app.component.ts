@@ -14,16 +14,16 @@ export class AppComponent implements OnInit {
 
   title = 'Musical Structure Playground';
   //private filename = 'fugue.m4a';//'jackstraw77-05-07.mp3';'gallivanture.m4a'
-  private filename1 = 'jackstraw77-05-07.mp3';
+  private filename1 = 'fugue.m4a';//'jackstraw77-05-07.mp3';
   private filename2 = 'jackstraw77-05-08.mp3';
   private dymoGraph: JsonGraph;
   private viewConfig: ViewConfig;
   private playingDymos: string[];
   private visualsCount = _.range(1);
   private options = {
-    iterative: true,
-    similarityThreshold: 0.99,
-    minSegmentLength: 5,
+    iterative: false,
+    similarityThreshold: 0.98,
+    minSegmentLength: 2,
     maxThreshold: 10,
     endThreshold: 0,
     onlyDiagonals: true,

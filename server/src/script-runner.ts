@@ -22,30 +22,32 @@ console.log('server started at '+SERVER_PATH);
 var fileManager = new FileManager('input/', 'output/', ROOT, SERVER_PATH);
 var featureExtractor = new FeatureExtractor();
 
-extractSW('fugue.m4a');
+var files = ['fugue.m4a', 'jackstraw77-05-07.mp3'];
+extractSW(files[1])
+	//.then(() => extractSW(files[0]))
+	.then(() => server.close());
 
-function extractSW(audioFile) {
+function extractSW(audioFile): Promise<any> {
 	var generator = new DymoGenerator();
 	var audioPath = fileManager.getAudioFilePath(audioFile);
-	fileManager.getFeatureFiles(audioFile)
-	.then(featureFiles => filterSelectedFeatures(featureFiles))
-	.then(r =>
-		DymoTemplates.createSingleSourceDymoFromFeatures(generator, audioPath, r.orderedFiles, r.subsetConditions)
-	)
-	.then(r => {console.log(r); return r})
-	.then(topDymo => {
-		var QF = siafun.QUANT_FUNCS;
-		options["quantizerFunctions"] = [QF.SORTED_SUMMARIZE(3), QF.CONSTANT(0), QF.ORDER()];
-		//options.optimizationDimension: 5,
-		return DymoTemplates.createStructuredDymoFromFeatures(generator, options)
-			.then(r => {
-				r.matrices.forEach((m,i) => postJson('mmatrix'+i+'.json', m.scoreMatrix));
-				postJson('pathmatrix.json', r.pathMatrix);
-			});
-	})
-	.then(r => console.log("done!"))
-	.catch(e => console.log(e))
-	.then(r => server.close());
+	return fileManager.getFeatureFiles(audioFile)
+		.then(featureFiles => filterSelectedFeatures(featureFiles))
+		.then(r =>
+			DymoTemplates.createSingleSourceDymoFromFeatures(generator, audioPath, r.orderedFiles, r.subsetConditions)
+		)
+		.then(r => {console.log(r); return r})
+		.then(() => {
+			var QF = siafun.QUANT_FUNCS;
+			options["quantizerFunctions"] = [QF.SORTED_SUMMARIZE(4), QF.CONSTANT(0), QF.ORDER()];
+			//options.optimizationDimension: 5,
+			return DymoTemplates.createStructuredDymoFromFeatures(generator, options)
+				.then(r => {
+					r.matrices.forEach((m,i) => postJson('mmatrix'+i+'.json', m.scoreMatrix));
+					postJson('pathmatrix.json', r.pathMatrix);
+				});
+		})
+		.then(() => console.log("done!"))
+		.catch(e => console.log(e));
 }
 
 function postJson(path, json) {

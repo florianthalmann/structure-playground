@@ -14,7 +14,7 @@ export let options = {
 	minSegmentLength: 5,
 	maxThreshold: 10,
 	endThreshold: 0,
-	onlyDiagonals: false,
+	onlyDiagonals: true,
 	patternIndices: ""
 };
 

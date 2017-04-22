@@ -181,7 +181,7 @@ export abstract class MusicVisualization {
 	}
 
 	getX = (d, i?) => {
-		return this.xScale(this.getVisualValue(d, {name:"time"}));//return xScale(getVisualValue(d, scope.viewconfig.xAxis.param, "x"));
+		return this.xScale(this.getVisualValue(d, this.viewconfig.xAxis.param, "x"));
 	}
 
 	getY0 = () => {
@@ -221,6 +221,7 @@ export abstract class MusicVisualization {
 		return color;
 	}
 
+	//TODO GENERALIZE THIS!!!
 	getText = (d) => {
 		var text = this.getVisualValue(d, {name:"simplechord"}, "text");
 		if (text != 0) {
@@ -256,7 +257,6 @@ export abstract class MusicVisualization {
 				} else if (dymo["features"]["@type"] == parameter.name) {
 					value = dymo["features"]["value"]["@value"];
 				}
-				//console.log(parameter.name, value)
 				if (!isNaN(value)) {
 					//not suitable for vectors!! (just takes the first element..)
 					if (Array.isArray(value)) {

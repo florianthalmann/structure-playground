@@ -21,27 +21,28 @@ app.get('/getaudiofilepath', (req, res) => {
 
 app.get('/getfeaturefiles', (req, res) => {
 	fileManager.getFeatureFiles(req.query.audiofile)
-		.then(r => res.end(r));
+		.then(r => res.end(JSON.stringify(r)))
+		.catch(e => console.log(e));
 });
 
 var currentFeatures;
 
-app.post('/setFeatureSelection', function(req, res) {
+app.post('/setFeatureSelection', (req, res) => {
 	currentFeatures = req.body;
 	res.end("feature selection updated");
 });
 
-app.post('/extractFeatures', function(req, res) {
+app.post('/extractFeatures', (req, res) => {
 	var paths = req.body.map(p => __dirname + '/' + p);
 	this.featureExtractor.extractFeatures(paths, currentFeatures)
 		.then(r => res.end("features extracted for " + req.body));
 });
 
-app.post('/postAudioFile', function(req, res) {
+app.post('/postAudioFile', (req, res) => {
 	var form = new formidable.IncomingForm();
 	form.multiples = true;
 	form.uploadDir = 'app/input/';
-	form.on('file', function(field, file) {
+	form.on('file', (field, file) => {
 		var currentDir = form.uploadDir+file.name.replace(/\./g,'_')+'/';
 		if (!fs.existsSync(currentDir)){
 			fs.mkdirSync(currentDir);
@@ -51,17 +52,13 @@ app.post('/postAudioFile', function(req, res) {
 		this.featureExtractor.extractFeatures([currentPath], currentFeatures)
 		 	.then(r => res.end("features extracted for " + currentPath));
 	});
-	form.on('error', function(err) {
-		console.log('An error has occured: \n' + err);
-	});
-	form.on('end', function() {
-		//res.end('file uploaded and analyzed');
-	});
+	form.on('error', err => console.log('An error has occured: \n' + err));
+	form.on('end', res.end('done uploading and analyzing'));
 	form.parse(req);
 });
 
-app.post('/saveOutfile', function(req, res) {
-	this.fileManager.saveOutFile(req.body.path, req.body.content)
+app.post('/saveOutfile', (req, res) => {
+	fileManager.saveOutFile(req.body.path, req.body.content)
 		.then(r => res.end('file saved at ' + req.body.path));
 });
 

@@ -34,7 +34,7 @@ export class DymoService {
   }
 
   getViewConfig(): Observable<ViewConfig> {
-    return this.generator.getFeatures().map(fs => this.adjustViewConfig(fs));
+    return this.generator.getManager().getFeatureInfo().map(fs => this.adjustViewConfig(fs));
   }
 
   getDymoGraph(): Observable<JsonGraph> {
@@ -145,13 +145,9 @@ export class DymoService {
 
   private adjustViewConfig(features): ViewConfig {
     let newConfig = _.clone(this.viewConfigTemplate);
-    //TEMPORARY HACK TO ADJUST MAX LEVELS
-    if (features.length >= 2) {
-      features[features.length-2].max = 3;
-    }
     this.setParam(newConfig.xAxis, "time", features);
     this.setParam(newConfig.yAxis, "level", features);
-    this.setParam(newConfig.size, "chromagram", features);
+    this.setParam(newConfig.size, "duration", features);
     return newConfig;
   }
 

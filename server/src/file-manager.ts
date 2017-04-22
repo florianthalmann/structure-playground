@@ -3,8 +3,7 @@ import * as fs from 'fs';
 export class FileManager {
 
   constructor(private inFolder: string, private outFolder: string, private rootPath: string,
-    private serverPath: string = rootPath) {
-    }
+    private serverPath: string = rootPath) { }
 
   getAudioFilePath(audioFile: string): string {
     return this.serverPath + this.toFolderName(audioFile) + audioFile;
