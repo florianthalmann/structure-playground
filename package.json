@@ -39,7 +39,6 @@
     "@types/async": "^2.0.40",
     "@types/d3": "^4.5.0",
     "@types/jasmine": "2.5.38",
-    "@types/lodash": "^4.14.58",
     "@types/node": "~6.0.60",
     "codelyzer": "~2.0.0",
     "jasmine-core": "~2.5.2",

@@ -1,5 +1,7 @@
 export var PORT = '4199';
 export var SERVER_PATH = 'http://localhost:' + PORT + '/';
+import { QUANT_FUNCS, OPTIMIZATION } from 'siafun';
+import * as math from 'mathjs';
 
 export interface FeatureConfig {
 	name: string,
@@ -8,15 +10,62 @@ export interface FeatureConfig {
 	selected: boolean
 }
 
-export let options = {
+export const DIRS = {
+	in: 'input/',
+	file: '1100.mp3',//'jackstraw77-05-07.mp3',
+	out: 'output/1100-bar-chroma-sia/'
+}
+
+export let options2 = {
 	iterative: true,
-	similarityThreshold: 0.99,
-	minSegmentLength: 5,
-	maxThreshold: 10,
+	similarityThreshold: .99,
+	minSegmentLength: 5, //stop when segment length below this
+	maxThreshold: 10, //stop when max value below this
 	endThreshold: 0,
 	onlyDiagonals: true,
 	patternIndices: ""
 };
+
+export let options = {
+	quantizerFunctions: [QUANT_FUNCS.SORTED_SUMMARIZE(3), QUANT_FUNCS.CONSTANT(0), QUANT_FUNCS.ORDER()],
+	//heuristic: dymoCore.HEURISTICS.COVERAGE,
+	selectionHeuristic: (pattern, vectors, occurrences, allPoints) => {
+		var dim = 3;//pattern[0].length;
+		//var gaps = getPointsInBoundingBox(pattern, allPoints).length - pattern.length;
+		//var result = pattern.length / Math.pow(1+gaps, 1/dim);
+
+		//var result = pattern.length * Math.sqrt(math.mean(vectors.map(v => math.norm(v)))) // * Math.sqrt(occurrences.length);
+
+		var norms = vectors.map(v => Math.sqrt(math.sum(v.map(p => Math.pow(p,2)))));//vectors.map(v => math.norm(v));
+		var avgNorm = Math.sqrt(math.mean(norms))
+		/*var result = 0;
+		if (math.mean(norms) > 5) {//pattern.length > 10) {
+			result = pattern.length * Math.sqrt(Math.log(occurrences.length) * Math.sqrt(math.mean(norms)));
+		}*/
+
+		var patternDuration = math.norm(math.subtract(pattern[pattern.length-1], pattern[0]));
+		//var result = pattern.length // / Math.pow(1+gaps, 1/dim) * Math.sqrt(math.mean(norms))
+		//TODO BEST var result = pattern.length > 1 ? pattern.length * Math.pow(avgNorm / patternDuration, 1/3) : 0;
+		var result = pattern.length > 3 ? pattern.length * avgNorm / Math.sqrt(patternDuration) : 0;
+
+		return result;
+	},
+	overlapping: true,
+	optimizationMethod: OPTIMIZATION.NONE,
+	optimizationHeuristic: (pattern, vectors, occurrences, allPoints) => {
+		var dim = 4;
+		var gaps = getPointsInBoundingBox(pattern, allPoints).length - pattern.length;
+		return pattern.length // Math.pow(1+gaps, 1/dim);
+	},
+	optimizationDimension: 5,
+	//patternIndices: patternIndices
+}
+
+function getPointsInBoundingBox(pattern, allPoints) {
+	var maxes = math.max(pattern, 0);
+	var mins = math.min(pattern, 0);
+	return allPoints.filter(p => p.every((e,i) => maxes[i] - mins[i] == 0 || (mins[i] <= e && e <= maxes[i])));
+}
 
 export let availableFeatures: FeatureConfig[] = [
 	{name:'sections', plugin:'vamp:qm-vamp-plugins:qm-segmenter:segmentation', selected:false},

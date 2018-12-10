@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as async from 'async';
 import { execute } from './util';
+import { FeatureConfig } from './config';
 
 export class FeatureExtractor {
 
   constructor() {}
 
-  extractFeatures(paths: string[], features: string[]): Promise<any> {
+  extractFeatures(paths: string[], features: FeatureConfig[]): Promise<any> {
     return new Promise(resolve =>
       async.mapSeries(paths, (p, c) =>
         async.mapSeries(features, (f,c) => this.extractFeature(f, p, c), c),
@@ -15,7 +16,7 @@ export class FeatureExtractor {
   }
 
   //extracts the given feature from the current audio file (currentPath) if it doesn't exist yet
-  private extractFeature(feature, path, callback) {
+  private extractFeature(feature: FeatureConfig, path: string, callback: Function) {
     var audioFolder = path.slice(0, path.lastIndexOf('/')+1);
     var audioFilename = path.slice(path.lastIndexOf('/')+1);
     var featureOutPath = path.replace(path.slice(path.lastIndexOf('.')), '');
